@@ -48,11 +48,6 @@
   
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-
-  <!-- Google Firebase SDKs (Auth + Firestore en tiempo real) -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   
   <!-- Custom Styles -->
   <link rel="stylesheet" href="styles.css">
@@ -79,14 +74,7 @@
         </div>
 
         <!-- Acciones Globales del Header -->
-        <div class="flex items-center space-x-1.5 sm:space-x-2.5">
-          <!-- Botón de Sincronización en la Nube -->
-          <button id="btnCloudSyncStatus" title="Sincronización Automática en la Nube" class="inline-flex items-center px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200/80 transition">
-            <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-slate-400 mr-1.5 flex-shrink-0"></span>
-            <i data-lucide="cloud" id="cloudStatusIcon" class="w-3.5 h-3.5 mr-1 text-slate-500"></i>
-            <span id="cloudStatusText" class="hidden sm:inline">Nube</span>
-          </button>
-
+        <div class="flex items-center space-x-2 sm:space-x-3">
           <!-- Botón de Modo Privacidad -->
           <button id="btnPrivacyToggle" title="Modo Privacidad: Oculta nombres en pantalla" class="inline-flex items-center px-2.5 sm:px-3 py-1.5 text-xs font-medium rounded-xl text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition">
             <i data-lucide="eye" id="privacyIcon" class="w-4 h-4 text-slate-500 sm:mr-1.5"></i>
@@ -96,7 +84,7 @@
           <!-- Respaldo / Exportar / Importar -->
           <button id="btnBackupModal" title="Copias de Seguridad (Exportar / Importar)" class="inline-flex items-center px-2.5 sm:px-3 py-1.5 text-xs font-medium rounded-xl text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition">
             <i data-lucide="database" class="w-4 h-4 text-slate-500 sm:mr-1.5"></i>
-            <span class="hidden sm:inline">Respaldo</span>
+            <span class="hidden sm:inline">Copias de Seguridad</span>
           </button>
 
           <!-- Botón Nueva Sesión Rápida -->
@@ -265,9 +253,9 @@
               <i data-lucide="plus-circle" class="w-4 h-4 mr-1 sm:mr-1.5"></i>
               <span>Nueva Sesión</span>
             </button>
-            <button id="btnTabEditPatient" class="inline-flex items-center px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-medium rounded-xl text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 shadow-sm transition" title="Editar Paciente y Objetivos">
-              <i data-lucide="pencil" class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 text-slate-500"></i>
-              <span>Editar</span>
+            <button id="btnTabEditPatient" class="inline-flex items-center px-3 py-1.5 sm:py-2 text-xs font-semibold rounded-xl text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-200 shadow-sm transition" title="Editar Paciente y Objetivos">
+              <i data-lucide="pencil" class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 text-teal-600"></i>
+              <span>Editar Paciente</span>
             </button>
             <button id="btnPrintPatientReport" class="inline-flex items-center p-1.5 sm:px-3 sm:py-2 text-xs font-medium rounded-xl text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 shadow-sm transition" title="Imprimir / Exportar Reporte">
               <i data-lucide="printer" class="w-4 h-4 text-slate-500"></i>
@@ -293,13 +281,13 @@
         </div>
 
         <!-- Contenido Scrolleable de las Pestañas -->
-        <div class="flex-1 overflow-y-auto p-6 bg-slate-50/40">
+        <div class="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-50/40">
 
           <!-- PESTAÑA 1: Resumen y Visualizador de Objetivos Terapéuticos -->
           <div id="tab-overview" class="tab-content space-y-6">
             
             <!-- Tarjeta 1: Visualizador de Objetivos Terapéuticos -->
-            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm">
               <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center space-x-2">
                   <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
@@ -312,7 +300,7 @@
                 </div>
                 <button id="btnQuickAddObjective" class="text-xs font-semibold text-teal-700 hover:text-teal-800 bg-teal-50 hover:bg-teal-100 px-2.5 py-1 rounded-lg border border-teal-200 transition flex items-center">
                   <i data-lucide="plus" class="w-3.5 h-3.5 mr-1"></i>
-                  Agregar Objetivo
+                  <span>Editar Metas</span>
                 </button>
               </div>
 
@@ -337,7 +325,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               
               <!-- Tareas dejadas en la última sesión -->
-              <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col">
+              <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm flex flex-col">
                 <div class="flex items-center space-x-2 mb-3">
                   <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
                     <i data-lucide="check-square" class="w-4 h-4"></i>
@@ -350,7 +338,7 @@
               </div>
 
               <!-- Plan / Recomendaciones para la próxima sesión -->
-              <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col">
+              <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm flex flex-col">
                 <div class="flex items-center space-x-2 mb-3">
                   <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
                     <i data-lucide="compass" class="w-4 h-4"></i>
@@ -365,11 +353,17 @@
             </div>
 
             <!-- Tarjeta 3: Información General del Paciente -->
-            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-              <h4 class="font-bold text-slate-800 text-sm mb-3 flex items-center">
-                <i data-lucide="file-text" class="w-4 h-4 mr-1.5 text-slate-400"></i>
-                Ficha General y Motivo de Consulta
-              </h4>
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm">
+              <div class="flex items-center justify-between mb-3">
+                <h4 class="font-bold text-slate-800 text-sm flex items-center">
+                  <i data-lucide="file-text" class="w-4 h-4 mr-1.5 text-slate-400"></i>
+                  Ficha General y Motivo de Consulta
+                </h4>
+                <button onclick="openPatientModal(true)" class="text-xs font-semibold text-teal-700 hover:text-teal-800 bg-teal-50 hover:bg-teal-100 px-2.5 py-1 rounded-lg border border-teal-200 transition flex items-center">
+                  <i data-lucide="pencil" class="w-3 h-3 mr-1"></i>
+                  Editar Ficha
+                </button>
+              </div>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                 <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
                   <span class="text-slate-400 block mb-0.5">Centro de Atención</span>
@@ -394,7 +388,7 @@
 
           <!-- PESTAÑA 2: Formulario de Nueva Sesión / Edición de Sesión -->
           <div id="tab-new-session" class="tab-content hidden">
-            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm max-w-3xl mx-auto">
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm max-w-3xl mx-auto">
               
               <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
                 <div class="flex items-center space-x-3">
@@ -415,7 +409,7 @@
               <form id="formSession" class="space-y-5">
                 <input type="hidden" id="editingSessionId" value="">
                 
-                <!-- Selector de Paciente (En caso de registro global o cambio rápido) -->
+                <!-- Selector de Paciente -->
                 <div>
                   <label class="block text-xs font-semibold text-slate-700 mb-1">
                     Paciente <span class="text-red-500">*</span>
@@ -426,7 +420,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <!-- Fecha y Hora de la Sesión (Editable, por defecto momento actual) -->
+                  <!-- Fecha y Hora de la Sesión -->
                   <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
                       <span>Fecha y Hora de la Sesión <span class="text-red-500">*</span></span>
@@ -456,7 +450,7 @@
                   </div>
                 </div>
 
-                <!-- Recordatorio de Objetivos Activos (Visualizador en el Formulario) -->
+                <!-- Recordatorio de Objetivos Activos -->
                 <div id="formObjectivesReminder" class="p-3.5 bg-teal-50/50 rounded-xl border border-teal-100 text-xs">
                   <span class="font-semibold text-teal-900 flex items-center mb-1">
                     <i data-lucide="target" class="w-3.5 h-3.5 mr-1 text-teal-600"></i>
@@ -756,123 +750,10 @@
           </button>
         </div>
 
-  <!-- MODAL 3: Sincronización en la Nube (Google Firebase) -->
-  <div id="cloudModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 hidden">
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-150">
-      
-      <!-- Encabezado del Modal -->
-      <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
-        <div class="flex items-center space-x-2.5">
-          <div class="w-9 h-9 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
-            <i data-lucide="cloud" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <h3 class="font-bold text-slate-900 text-sm">Sincronización en Tiempo Real</h3>
-            <p class="text-xs text-slate-500">Conecta tu computadora y celular automáticamente</p>
-          </div>
-        </div>
-        <button id="btnCloseCloudModal" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <!-- Contenido del Modal -->
-      <div class="flex-1 overflow-y-auto p-5 space-y-4 text-xs">
-        
-        <!-- Estado Actual de Conexión -->
-        <div id="cloudStatusBanner" class="p-3.5 rounded-xl border flex items-center justify-between bg-slate-50 border-slate-200">
-          <div class="flex items-center space-x-2.5">
-            <span id="cloudModalStatusDot" class="w-2.5 h-2.5 rounded-full bg-slate-400 flex-shrink-0"></span>
-            <div>
-              <span id="cloudModalStatusTitle" class="font-bold text-slate-800 block text-xs">Modo Local (Sin Nube)</span>
-              <span id="cloudModalStatusDesc" class="text-[11px] text-slate-500">Los datos se guardan solo en este dispositivo</span>
-            </div>
-          </div>
-          <button id="btnLogoutFirebase" class="hidden text-xs text-red-600 hover:text-red-700 font-semibold px-2.5 py-1 rounded-lg hover:bg-red-50 transition">
-            Cerrar Sesión
-          </button>
-        </div>
-
-        <!-- SECCIÓN A: Inicio de Sesión / Registro (Visible si Firebase está configurado) -->
-        <div id="cloudAuthSection" class="space-y-3 p-4 rounded-xl border border-slate-200 bg-white">
-          <h4 class="font-bold text-slate-900 text-xs flex items-center">
-            <i data-lucide="user-check" class="w-4 h-4 mr-1.5 text-teal-600"></i>
-            Acceso a tu Cuenta de Terapeuta
-          </h4>
-          <p class="text-slate-500 text-[11px]">Ingresa con tu correo y clave para sincronizar tus pacientes entre tu celular y tu PC.</p>
-
-          <form id="formCloudAuth" class="space-y-3 pt-1">
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-700 mb-1">Correo Electrónico</label>
-              <input 
-                type="email" 
-                id="cloudEmailInput" 
-                placeholder="ejemplo@psicologia.com" 
-                class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition"
-              />
-            </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-700 mb-1">Contraseña</label>
-              <input 
-                type="password" 
-                id="cloudPasswordInput" 
-                placeholder="Mínimo 6 caracteres" 
-                class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition"
-              />
-            </div>
-
-            <div class="flex items-center gap-2 pt-1">
-              <button type="submit" id="btnLoginCloud" class="flex-1 py-2 px-3 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl shadow-sm transition flex items-center justify-center">
-                <i data-lucide="log-in" class="w-3.5 h-3.5 mr-1.5"></i>
-                Iniciar Sesión
-              </button>
-              <button type="button" id="btnRegisterCloud" class="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl border border-slate-200 transition flex items-center justify-center">
-                <i data-lucide="user-plus" class="w-3.5 h-3.5 mr-1.5 text-slate-500"></i>
-                Crear Cuenta
-              </button>
-            </div>
-          </form>
-        </div>
-
-        <!-- SECCIÓN B: Configuración de Firebase (Claves del Proyecto) -->
-        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/60 space-y-2.5">
-          <div class="flex items-center justify-between">
-            <h4 class="font-bold text-slate-800 text-xs flex items-center">
-              <i data-lucide="settings" class="w-4 h-4 mr-1.5 text-slate-600"></i>
-              Configuración de Firebase (Google Cloud)
-            </h4>
-            <span id="firebaseConfiguredBadge" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">No Conectado</span>
-          </div>
-          
-          <p class="text-slate-500 text-[11px] leading-relaxed">
-            Pega aquí el bloque de configuración que te da Google Firebase (es 100% gratuito):
-          </p>
-
-          <textarea 
-            id="firebaseConfigInput" 
-            rows="4" 
-            placeholder='Pega aquí tu código de Firebase:&#10;const firebaseConfig = {&#10;  apiKey: "...",&#10;  authDomain: "...",&#10;  projectId: "..."&#10;};' 
-            class="w-full text-[11px] font-mono bg-white border border-slate-200 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
-          ></textarea>
-
-          <div class="flex items-center justify-between pt-1">
-            <button type="button" id="btnSaveFirebaseConfig" class="py-1.5 px-3 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg shadow-sm transition text-xs flex items-center">
-              <i data-lucide="save" class="w-3.5 h-3.5 mr-1.5"></i>
-              Guardar y Conectar
-            </button>
-            <a href="https://console.firebase.google.com" target="_blank" class="text-[11px] text-teal-700 hover:underline flex items-center font-medium">
-              <span>Abrir Firebase Console</span>
-              <i data-lucide="external-link" class="w-3 h-3 ml-1"></i>
-            </a>
-          </div>
-        </div>
-
-        <!-- Acciones rápidas de Nube -->
-        <div id="cloudManualSyncBox" class="p-3 bg-teal-50/60 rounded-xl border border-teal-100 flex items-center justify-between text-[11px] hidden">
-          <span class="text-teal-900 font-medium">¿Deseas sincronizar tus datos locales actuales con la nube?</span>
-          <button id="btnPushLocalToCloud" class="px-2.5 py-1 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg transition shadow-sm">
-            Subir a la Nube
-          </button>
+        <!-- Cargar datos de prueba / Limpiar -->
+        <div class="pt-2 flex items-center justify-between text-[11px]">
+          <button id="btnLoadSampleData" class="text-teal-700 hover:underline">Cargar datos de ejemplo</button>
+          <button id="btnClearAllData" class="text-red-600 hover:underline">Borrar todo</button>
         </div>
 
       </div>
