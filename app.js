@@ -9,6 +9,7 @@
 
 const STORAGE_KEY = 'psicogest_patients_v1';
 const PRIVACY_KEY = 'psicogest_privacy_v1';
+const FIREBASE_CONFIG_KEY = 'psicogest_firebase_config_v1';
 
 let appState = {
   patients: [],
@@ -19,6 +20,196 @@ let appState = {
   activeTab: 'tab-overview',
   isPrivacyMode: false,
 };
+
+let firebaseState = {
+  isConfigured: false,
+  currentUser: null,
+  db: null,
+  auth: null,
+  unsubscribeListener: null,
+  isSyncing: false
+};
+
+// ==========================================
+// 2. INTEGRACIÓN DE GOOGLE FIREBASE (NUBE)
+// ==========================================
+
+function initFirebase() {
+  if (typeof firebase === 'undefined') return;
+
+  const rawConfig = localStorage.getItem(FIREBASE_CONFIG_KEY);
+  const badge = document.getElementById('firebaseConfiguredBadge');
+  const configTextarea = document.getElementById('firebaseConfigInput');
+
+  if (rawConfig) {
+    try {
+      const config = JSON.parse(rawConfig);
+      if (firebase.apps.length === 0) {
+        firebase.initializeApp(config);
+      }
+      firebaseState.auth = firebase.auth();
+      firebaseState.db = firebase.firestore();
+      firebaseState.isConfigured = true;
+
+      if (badge) {
+        badge.textContent = 'Conectado a Firebase';
+        badge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200';
+      }
+      if (configTextarea) {
+        configTextarea.value = JSON.stringify(config, null, 2);
+      }
+
+      // Escuchar cambios de autenticación
+      firebaseState.auth.onAuthStateChanged(handleAuthChange);
+    } catch (e) {
+      console.error('Error al inicializar Firebase:', e);
+      if (badge) badge.textContent = 'Error de Configuración';
+    }
+  } else {
+    updateCloudUI('disconnected');
+  }
+}
+
+function parseFirebaseConfig(inputStr) {
+  if (!inputStr || inputStr.trim() === '') return null;
+  const trimmed = inputStr.trim();
+
+  // Intento 1: Parsear como JSON directo
+  try {
+    const obj = JSON.parse(trimmed);
+    if (obj.apiKey && obj.projectId) return obj;
+  } catch (e) {}
+
+  // Intento 2: Extraer de snippet JavaScript (const firebaseConfig = { ... })
+  try {
+    const extract = (key) => {
+      const match = trimmed.match(new RegExp(`${key}["']?\\s*:\\s*["']([^"']+)["']`));
+      return match ? match[1] : '';
+    };
+
+    const config = {
+      apiKey: extract('apiKey'),
+      authDomain: extract('authDomain'),
+      projectId: extract('projectId'),
+      storageBucket: extract('storageBucket'),
+      messagingSenderId: extract('messagingSenderId'),
+      appId: extract('appId')
+    };
+
+    if (config.apiKey && config.projectId) {
+      return config;
+    }
+  } catch (e) {}
+
+  return null;
+}
+
+function handleAuthChange(user) {
+  const statusDot = document.getElementById('cloudModalStatusDot');
+  const statusTitle = document.getElementById('cloudModalStatusTitle');
+  const statusDesc = document.getElementById('cloudModalStatusDesc');
+  const btnLogout = document.getElementById('btnLogoutFirebase');
+  const authSection = document.getElementById('cloudAuthSection');
+  const manualSyncBox = document.getElementById('cloudManualSyncBox');
+
+  if (user) {
+    firebaseState.currentUser = user;
+    if (statusDot) statusDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 flex-shrink-0 animate-pulse';
+    if (statusTitle) statusTitle.textContent = `Nube Activa: ${user.email}`;
+    if (statusDesc) statusDesc.textContent = 'Sincronización en tiempo real habilitada con tu celular y PC';
+    if (btnLogout) btnLogout.classList.remove('hidden');
+    if (authSection) authSection.classList.add('hidden');
+    if (manualSyncBox) manualSyncBox.classList.remove('hidden');
+
+    updateCloudUI('synced', user.email);
+
+    // Iniciar escucha en tiempo real de Firestore
+    startFirestoreListener(user.uid);
+  } else {
+    firebaseState.currentUser = null;
+    if (firebaseState.unsubscribeListener) {
+      firebaseState.unsubscribeListener();
+      firebaseState.unsubscribeListener = null;
+    }
+    if (statusDot) statusDot.className = 'w-2.5 h-2.5 rounded-full bg-slate-400 flex-shrink-0';
+    if (statusTitle) statusTitle.textContent = 'Sesión no iniciada en la Nube';
+    if (statusDesc) statusDesc.textContent = 'Inicia sesión abajo para sincronizar con tu celular';
+    if (btnLogout) btnLogout.classList.add('hidden');
+    if (authSection) authSection.classList.remove('hidden');
+    if (manualSyncBox) manualSyncBox.classList.add('hidden');
+
+    updateCloudUI('disconnected');
+  }
+}
+
+function startFirestoreListener(userId) {
+  if (!firebaseState.db) return;
+  if (firebaseState.unsubscribeListener) firebaseState.unsubscribeListener();
+
+  const docRef = firebaseState.db.collection('therapists').doc(userId);
+  firebaseState.unsubscribeListener = docRef.onSnapshot(doc => {
+    if (doc.exists) {
+      const data = doc.data();
+      if (data && Array.isArray(data.patients)) {
+        const cloudStr = JSON.stringify(data.patients);
+        const localStr = JSON.stringify(appState.patients);
+        if (cloudStr !== localStr) {
+          appState.patients = data.patients;
+          localStorage.setItem(STORAGE_KEY, cloudStr);
+          renderAll();
+          showToast('Datos actualizados en tiempo real ☁️', 'info');
+        }
+      }
+    } else {
+      // Si aún no hay datos en la nube para este usuario, subimos los locales iniciales
+      syncToFirestore();
+    }
+  }, error => {
+    console.error('Error de escucha en Firestore:', error);
+  });
+}
+
+function syncToFirestore() {
+  if (!firebaseState.currentUser || !firebaseState.db) return;
+  updateCloudUI('syncing');
+
+  firebaseState.db.collection('therapists').doc(firebaseState.currentUser.uid).set({
+    patients: appState.patients,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  }, { merge: true })
+  .then(() => {
+    updateCloudUI('synced', firebaseState.currentUser.email);
+  })
+  .catch(err => {
+    console.error('Error al guardar en Firestore:', err);
+    updateCloudUI('error');
+  });
+}
+
+function updateCloudUI(status, email = '') {
+  const dot = document.getElementById('cloudStatusDot');
+  const text = document.getElementById('cloudStatusText');
+  const btn = document.getElementById('btnCloudSyncStatus');
+  if (!dot || !text || !btn) return;
+
+  if (status === 'synced') {
+    dot.className = 'w-2 h-2 rounded-full bg-emerald-500 mr-1.5 flex-shrink-0 animate-pulse';
+    text.textContent = 'Nube Activa';
+    btn.className = 'inline-flex items-center px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-sm transition';
+  } else if (status === 'syncing') {
+    dot.className = 'w-2 h-2 rounded-full bg-amber-400 mr-1.5 flex-shrink-0 animate-ping';
+    text.textContent = 'Sincronizando...';
+    btn.className = 'inline-flex items-center px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-xl bg-amber-50 text-amber-800 border border-amber-200 transition';
+  } else if (status === 'error') {
+    dot.className = 'w-2 h-2 rounded-full bg-red-500 mr-1.5 flex-shrink-0';
+    text.textContent = 'Error Nube';
+    btn.className = 'inline-flex items-center px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-xl bg-red-50 text-red-800 border border-red-200 transition';
+  } else {
+    dot.className = 'w-2 h-2 rounded-full bg-slate-400 mr-1.5 flex-shrink-0';
+    text.textContent = 'Conectar Nube';
+    btn.className = 'inline-flex items-center px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200/80 transition';
+  }
+}
 
 // Datos de ejemplo para primera carga
 const SAMPLE_PATIENTS = [
@@ -243,6 +434,9 @@ function loadData() {
 function saveData() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(appState.patients));
   renderStats();
+  if (firebaseState.currentUser) {
+    syncToFirestore();
+  }
 }
 
 // ==========================================
@@ -1265,6 +1459,115 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // ==========================================
+  // Eventos de Nube y Firebase
+  // ==========================================
+
+  // Abrir / Cerrar Modal de Nube
+  document.getElementById('btnCloudSyncStatus')?.addEventListener('click', () => {
+    document.getElementById('cloudModal').classList.remove('hidden');
+    lucide.createIcons({ root: document.getElementById('cloudModal') });
+  });
+
+  document.getElementById('btnCloseCloudModal')?.addEventListener('click', () => {
+    document.getElementById('cloudModal').classList.add('hidden');
+  });
+
+  // Guardar Configuración de Firebase
+  document.getElementById('btnSaveFirebaseConfig')?.addEventListener('click', () => {
+    const inputVal = document.getElementById('firebaseConfigInput').value;
+    const config = parseFirebaseConfig(inputVal);
+
+    if (!config) {
+      showToast('Formato de configuración inválido. Pega el código de Firebase.', 'error');
+      return;
+    }
+
+    localStorage.setItem(FIREBASE_CONFIG_KEY, JSON.stringify(config));
+    showToast('Configuración de Firebase guardada', 'success');
+    initFirebase();
+  });
+
+  // Iniciar Sesión en Firebase
+  document.getElementById('formCloudAuth')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!firebaseState.auth) {
+      showToast('Primero debes configurar Firebase abajo.', 'error');
+      return;
+    }
+
+    const email = document.getElementById('cloudEmailInput').value.trim();
+    const password = document.getElementById('cloudPasswordInput').value;
+
+    if (!email || !password) {
+      showToast('Ingresa tu correo y contraseña.', 'error');
+      return;
+    }
+
+    firebaseState.auth.signInWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        showToast(`¡Bienvenido ${userCredential.user.email}!`, 'success');
+        document.getElementById('formCloudAuth').reset();
+      })
+      .catch((error) => {
+        console.error(error);
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+          showToast('Usuario o contraseña incorrectos.', 'error');
+        } else if (error.code === 'auth/invalid-email') {
+          showToast('Formato de correo no válido.', 'error');
+        } else {
+          showToast('Error al iniciar sesión: ' + error.message, 'error');
+        }
+      });
+  });
+
+  // Registrarse en Firebase
+  document.getElementById('btnRegisterCloud')?.addEventListener('click', () => {
+    if (!firebaseState.auth) {
+      showToast('Primero debes configurar Firebase abajo.', 'error');
+      return;
+    }
+
+    const email = document.getElementById('cloudEmailInput').value.trim();
+    const password = document.getElementById('cloudPasswordInput').value;
+
+    if (!email || password.length < 6) {
+      showToast('Ingresa un correo válido y clave de al menos 6 caracteres.', 'error');
+      return;
+    }
+
+    firebaseState.auth.createUserWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        showToast('¡Cuenta creada y sincronización activada!', 'success');
+        document.getElementById('formCloudAuth').reset();
+        // Subir datos locales iniciales
+        syncToFirestore();
+      })
+      .catch((error) => {
+        console.error(error);
+        if (error.code === 'auth/email-already-in-use') {
+          showToast('Este correo ya está registrado. Haz clic en Iniciar Sesión.', 'info');
+        } else {
+          showToast('Error al registrar cuenta: ' + error.message, 'error');
+        }
+      });
+  });
+
+  // Cerrar Sesión en Firebase
+  document.getElementById('btnLogoutFirebase')?.addEventListener('click', () => {
+    if (firebaseState.auth) {
+      firebaseState.auth.signOut().then(() => {
+        showToast('Sesión cerrada. Los datos se guardan en modo local.', 'info');
+      });
+    }
+  });
+
+  // Subir datos locales a la nube manualmente
+  document.getElementById('btnPushLocalToCloud')?.addEventListener('click', () => {
+    syncToFirestore();
+    showToast('Datos locales enviados a la nube', 'success');
+  });
+
   // Modo Privacidad
   document.getElementById('btnPrivacyToggle').addEventListener('click', togglePrivacyMode);
 
@@ -1323,6 +1626,9 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('mainContent')?.classList.add('flex');
     }
   });
+
+  // Inicializar Firebase
+  initFirebase();
 
   // Render inicial
   renderAll();
