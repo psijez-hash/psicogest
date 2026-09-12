@@ -1,0 +1,139 @@
+/* Estilos Personalizados para PsicoGest */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* Scrollbars estilizadas */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Modo Privacidad / Confidencial */
+body.privacy-active .privacy-target {
+  filter: blur(6px);
+  user-select: none;
+  transition: filter 0.2s ease;
+}
+
+body.privacy-active .privacy-target:hover {
+  filter: blur(0px);
+}
+
+/* Badges por Centro */
+.badge-descubriendo {
+  background-color: #f3e8ff;
+  color: #7e22ce;
+  border: 1px solid #d8b4fe;
+}
+.badge-psicovive {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+.badge-particulares {
+  background-color: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+/* Badges de Estado */
+.badge-status-activo {
+  background-color: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+.badge-status-inactivo {
+  background-color: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+}
+
+/* Botones de Filtro Activo */
+.filter-center-btn.active {
+  background-color: #0f766e !important;
+  color: #ffffff !important;
+  border-color: #0f766e !important;
+}
+
+.filter-status-btn.active {
+  background-color: #0f766e !important;
+  color: #ffffff !important;
+  border-color: #0f766e !important;
+  font-weight: 600 !important;
+}
+
+/* Animaciones suaves */
+.patient-card {
+  transition: all 0.15s ease-in-out;
+}
+.patient-card:hover {
+  transform: translateY(-1px);
+}
+.patient-card.selected {
+  border-color: #14b8a6;
+  background-color: #f0fdfa;
+}
+.patient-card.is-inactive {
+  opacity: 0.75;
+}
+.patient-card.is-inactive:hover {
+  opacity: 1;
+}
+
+/* Estilos de Impresión / Exportación a PDF */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    font-size: 11pt;
+  }
+  
+  .no-print, header, aside, #btnTabNewSession, #btnTabEditPatient, #btnPrintPatientReport, .patient-tab-btn, #toastContainer, #patientModal, #backupModal {
+    display: none !important;
+  }
+
+  .max-w-7xl {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  main {
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .tab-content {
+    display: block !important;
+  }
+
+  #tab-new-session {
+    display: none !important;
+  }
+
+  .privacy-target {
+    filter: none !important;
+  }
+
+  .bg-slate-50, .bg-slate-50\/70, .bg-slate-50\/40 {
+    background-color: transparent !important;
+  }
+
+  .border {
+    border-color: #e2e8f0 !important;
+  }
+}
