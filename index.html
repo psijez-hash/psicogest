@@ -98,11 +98,11 @@
     </div>
   </header>
 
-  <!-- Contenedor Principal con Layout de 2 Columnas -->
-  <div class="flex-1 flex max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 gap-6 overflow-hidden">
+  <!-- Contenedor Principal con Layout Adaptativo (Móvil y Escritorio) -->
+  <div class="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto px-2 sm:px-6 lg:px-8 py-3 sm:py-6 gap-4 sm:gap-6 overflow-hidden">
 
     <!-- COLUMNA IZQUIERDA: Directorio de Pacientes y Filtros (Sidebar) -->
-    <aside class="w-full md:w-80 lg:w-96 flex flex-col bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex-shrink-0 no-print">
+    <aside id="patientSidebar" class="w-full md:w-80 lg:w-96 flex flex-col bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex-shrink-0 no-print">
       
       <!-- Encabezado del Sidebar -->
       <div class="p-4 border-b border-slate-100 space-y-3 bg-slate-50/70">
@@ -177,7 +177,7 @@
     </aside>
 
     <!-- COLUMNA DERECHA: Área de Trabajo Principal (Ficha de Paciente / Sesiones / Objetivos) -->
-    <main class="flex-1 flex flex-col bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden min-w-0">
+    <main id="mainContent" class="flex-1 flex flex-col bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden min-w-0">
       
       <!-- VISTA 1: Estado Vacío (Ningún paciente seleccionado) -->
       <div id="emptyStateView" class="flex-1 flex flex-col items-center justify-center p-8 text-center bg-slate-50/50">
@@ -221,52 +221,61 @@
       <!-- VISTA 2: Panel del Paciente Seleccionado -->
       <div id="patientDetailView" class="flex-1 flex flex-col overflow-hidden hidden">
         
+        <!-- Barra Móvil: Botón Volver a la Lista de Pacientes -->
+        <div class="px-4 py-2.5 bg-teal-50/90 border-b border-teal-100 flex items-center justify-between md:hidden no-print">
+          <button id="btnBackToPatientList" class="inline-flex items-center text-xs font-bold text-teal-800 bg-white hover:bg-teal-100 px-3 py-1.5 rounded-xl border border-teal-200 shadow-sm transition">
+            <i data-lucide="arrow-left" class="w-4 h-4 mr-1.5 text-teal-700"></i>
+            <span>Lista de Pacientes</span>
+          </button>
+          <span class="text-xs font-semibold text-teal-900">Ficha Clínica</span>
+        </div>
+
         <!-- Cabecera del Paciente -->
-        <div class="p-5 border-b border-slate-200 bg-slate-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div class="flex items-start space-x-3.5">
-            <div id="patientAvatar" class="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 text-white font-bold text-lg flex items-center justify-center shadow-md flex-shrink-0">
+        <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          <div class="flex items-start space-x-3 sm:space-x-3.5">
+            <div id="patientAvatar" class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 text-white font-bold text-base sm:text-lg flex items-center justify-center shadow-md flex-shrink-0">
               --
             </div>
             <div>
-              <div class="flex items-center space-x-2 flex-wrap gap-y-1">
-                <h1 id="patientNameHeader" class="text-xl font-bold text-slate-900 tracking-tight privacy-target">Nombre del Paciente</h1>
-                <span id="patientStatusBadge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full badge-status-activo">Activo</span>
-                <span id="patientCenterBadge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full">Centro</span>
-                <span id="patientSessionCountBadge" class="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">0 sesiones</span>
+              <div class="flex items-center space-x-1.5 sm:space-x-2 flex-wrap gap-y-1">
+                <h1 id="patientNameHeader" class="text-base sm:text-xl font-bold text-slate-900 tracking-tight privacy-target">Nombre del Paciente</h1>
+                <span id="patientStatusBadge" class="text-[11px] sm:text-xs font-semibold px-2 sm:px-2.5 py-0.5 rounded-full badge-status-activo">Activo</span>
+                <span id="patientCenterBadge" class="text-[11px] sm:text-xs font-semibold px-2 sm:px-2.5 py-0.5 rounded-full">Centro</span>
+                <span id="patientSessionCountBadge" class="text-[11px] sm:text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">0 sesiones</span>
               </div>
-              <p id="patientMotivoHeader" class="text-xs text-slate-500 mt-1 line-clamp-1">Motivo de consulta no especificado</p>
+              <p id="patientMotivoHeader" class="text-[11px] sm:text-xs text-slate-500 mt-0.5 sm:mt-1 line-clamp-1">Motivo de consulta no especificado</p>
             </div>
           </div>
 
           <!-- Acciones de Cabecera -->
           <div class="flex items-center space-x-2 no-print self-end sm:self-center">
-            <button id="btnTabNewSession" class="inline-flex items-center px-3.5 py-2 text-xs font-semibold rounded-xl text-white bg-teal-600 hover:bg-teal-700 shadow-sm transition">
-              <i data-lucide="plus-circle" class="w-4 h-4 mr-1.5"></i>
-              Nueva Sesión
+            <button id="btnTabNewSession" class="inline-flex items-center px-3 sm:px-3.5 py-1.5 sm:py-2 text-xs font-semibold rounded-xl text-white bg-teal-600 hover:bg-teal-700 shadow-sm transition">
+              <i data-lucide="plus-circle" class="w-4 h-4 mr-1 sm:mr-1.5"></i>
+              <span>Nueva Sesión</span>
             </button>
-            <button id="btnTabEditPatient" class="inline-flex items-center px-3 py-2 text-xs font-medium rounded-xl text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 shadow-sm transition" title="Editar Paciente y Objetivos">
-              <i data-lucide="pencil" class="w-4 h-4 mr-1.5 text-slate-500"></i>
-              Editar Paciente
+            <button id="btnTabEditPatient" class="inline-flex items-center px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-medium rounded-xl text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 shadow-sm transition" title="Editar Paciente y Objetivos">
+              <i data-lucide="pencil" class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 text-slate-500"></i>
+              <span>Editar</span>
             </button>
-            <button id="btnPrintPatientReport" class="inline-flex items-center px-3 py-2 text-xs font-medium rounded-xl text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 shadow-sm transition" title="Imprimir / Exportar Reporte">
+            <button id="btnPrintPatientReport" class="inline-flex items-center p-1.5 sm:px-3 sm:py-2 text-xs font-medium rounded-xl text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 shadow-sm transition" title="Imprimir / Exportar Reporte">
               <i data-lucide="printer" class="w-4 h-4 text-slate-500"></i>
             </button>
           </div>
         </div>
 
         <!-- Barra de Pestañas de Navegación del Paciente -->
-        <div class="flex border-b border-slate-200 px-6 bg-white no-print">
-          <button class="patient-tab-btn active py-3 px-4 text-xs font-semibold border-b-2 border-teal-600 text-teal-700 flex items-center space-x-2" data-tab="tab-overview">
+        <div class="flex border-b border-slate-200 px-3 sm:px-6 bg-white overflow-x-auto scrollbar-none flex-nowrap no-print">
+          <button class="patient-tab-btn active py-3 px-3 sm:px-4 text-xs font-semibold border-b-2 border-teal-600 text-teal-700 flex items-center space-x-1.5 sm:space-x-2 whitespace-nowrap flex-shrink-0" data-tab="tab-overview">
             <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
             <span>Resumen y Objetivos</span>
           </button>
-          <button class="patient-tab-btn py-3 px-4 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center space-x-2" data-tab="tab-new-session">
+          <button class="patient-tab-btn py-3 px-3 sm:px-4 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center space-x-1.5 sm:space-x-2 whitespace-nowrap flex-shrink-0" data-tab="tab-new-session">
             <i data-lucide="calendar-plus" class="w-4 h-4"></i>
             <span>Registrar Sesión</span>
           </button>
-          <button class="patient-tab-btn py-3 px-4 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center space-x-2" data-tab="tab-history">
+          <button class="patient-tab-btn py-3 px-3 sm:px-4 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center space-x-1.5 sm:space-x-2 whitespace-nowrap flex-shrink-0" data-tab="tab-history">
             <i data-lucide="history" class="w-4 h-4"></i>
-            <span>Historial de Sesiones</span>
+            <span>Historial</span>
             <span id="historyBadgeCount" class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-full font-bold">0</span>
           </button>
         </div>

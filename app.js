@@ -369,10 +369,37 @@ function renderPatientList() {
   lucide.createIcons({ root: container });
 }
 
+function setMobileView(view) {
+  const sidebar = document.getElementById('patientSidebar');
+  const main = document.getElementById('mainContent');
+  if (!sidebar || !main) return;
+
+  if (window.innerWidth < 768) {
+    if (view === 'list') {
+      sidebar.classList.remove('hidden');
+      sidebar.classList.add('flex');
+      main.classList.remove('flex');
+      main.classList.add('hidden');
+    } else {
+      sidebar.classList.remove('flex');
+      sidebar.classList.add('hidden');
+      main.classList.remove('hidden');
+      main.classList.add('flex');
+    }
+  } else {
+    sidebar.classList.remove('hidden');
+    sidebar.classList.add('flex');
+    main.classList.remove('hidden');
+    main.classList.add('flex');
+  }
+  lucide.createIcons();
+}
+
 function selectPatient(patientId) {
   appState.selectedPatientId = patientId;
   renderPatientList();
   renderPatientDetail();
+  setMobileView('detail');
 }
 
 function renderPatientDetail() {
@@ -1282,7 +1309,27 @@ document.addEventListener('DOMContentLoaded', () => {
     window.print();
   });
 
+  // Botón Volver a Lista de Pacientes (Móvil)
+  document.getElementById('btnBackToPatientList')?.addEventListener('click', () => {
+    setMobileView('list');
+  });
+
+  // Ajuste al cambiar tamaño de pantalla
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 768) {
+      document.getElementById('patientSidebar')?.classList.remove('hidden');
+      document.getElementById('patientSidebar')?.classList.add('flex');
+      document.getElementById('mainContent')?.classList.remove('hidden');
+      document.getElementById('mainContent')?.classList.add('flex');
+    }
+  });
+
   // Render inicial
   renderAll();
   resetSessionForm();
+
+  // En pantallas móviles, iniciar en la lista de pacientes
+  if (window.innerWidth < 768) {
+    setMobileView('list');
+  }
 });
